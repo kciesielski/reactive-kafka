@@ -11,5 +11,5 @@ trait Config {
   protected val kafkaHost = config.getString("akka.kafka.benchmarks.bootstrap-server") + ":9092"
   protected val testName = config.getString("akka.kafka.benchmarks.test-name")
   protected val msgCount = config.getInt("akka.kafka.benchmarks.msg-count")
-
+  protected val msgBytes = config.getInt("akka.kafka.benchmarks.msg-bytes")
 }

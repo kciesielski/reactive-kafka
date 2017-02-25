@@ -4,26 +4,31 @@
  */
 package akka.kafka.benchmarks
 
+import akka.kafka.benchmarks.Benchmarks.BenchmarkProducer
 import akka.kafka.benchmarks.app.RunTestCommand
-import org.apache.kafka.clients.producer.KafkaProducer
 
-case class KafkaProducerTestFixture(topic: String, msgCount: Int, producer: KafkaProducer[Array[Byte], String]) {
+case class KafkaProducerTestFixture(
+    topic: String,
+    msgCount: Int,
+    msgBytes: Int,
+    producer: BenchmarkProducer
+) {
   def close(): Unit = producer.close()
 }
 
 object KafkaProducerFixtures extends PerfFixtureHelpers {
 
   def noopFixtureGen(c: RunTestCommand) = FixtureGen[KafkaProducerTestFixture](
-    c, msgCount => {
-    KafkaProducerTestFixture("topic", msgCount, null)
+    c, (msgCount, msgBytes) => {
+    KafkaProducerTestFixture("topic", msgCount, msgBytes, null)
   }
   )
 
   def initializedProducer(c: RunTestCommand) = FixtureGen[KafkaProducerTestFixture](
-    c, msgCount => {
+    c, (msgCount, msgBytes) => {
     val topic = randomId()
     val rawProducer = initTopicAndProducer(c.kafkaHost, topic)
-    KafkaProducerTestFixture(topic, msgCount, rawProducer)
+    KafkaProducerTestFixture(topic, msgCount, msgBytes, rawProducer)
   }
   )
 }

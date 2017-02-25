@@ -6,6 +6,7 @@ package akka.kafka.benchmarks
 
 import akka.kafka.ConsumerMessage.CommittableMessage
 import akka.kafka.ProducerMessage.Message
+import akka.kafka.benchmarks.Benchmarks.BenchmarkProducerRecord
 import akka.kafka.benchmarks.ReactiveKafkaProducerFixtures.ReactiveKafkaProducerTestFixture
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
@@ -21,8 +22,6 @@ object ReactiveKafkaProducerBenchmarks extends LazyLogging {
   val streamingTimeout = 30 minutes
   val logStep = 100000
 
-  type Fixture = ReactiveKafkaConsumerTestFixture[CommittableMessage[Array[Byte], String]]
-
   /**
    * Iterates over N lazily-generated elements and passes them through a Kafka flow.
    */
@@ -31,7 +30,7 @@ object ReactiveKafkaProducerBenchmarks extends LazyLogging {
     @volatile var lastPartStart = System.nanoTime()
 
     val future = Source(0 to fixture.msgCount)
-      .map(number => Message(new ProducerRecord[Array[Byte], String](fixture.topic, number.toString), number))
+      .map(number => Message(new BenchmarkProducerRecord(fixture.topic, number.toString), number))
       .via(fixture.flow)
       .map {
         msg =>

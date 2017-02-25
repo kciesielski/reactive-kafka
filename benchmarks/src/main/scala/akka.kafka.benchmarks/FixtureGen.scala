@@ -6,4 +6,4 @@ package akka.kafka.benchmarks
 
 import akka.kafka.benchmarks.app.RunTestCommand
 
-case class FixtureGen[F](command: RunTestCommand, generate: Int => F)
+case class FixtureGen[F](command: RunTestCommand, generate: (Int, Int) => F)

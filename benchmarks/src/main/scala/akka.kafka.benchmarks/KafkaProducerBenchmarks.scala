@@ -4,12 +4,23 @@
  */
 package akka.kafka.benchmarks
 
+import java.util.concurrent.ThreadLocalRandom
+
+import akka.kafka.benchmarks.Benchmarks.{BenchmarkProducerRecord, Value}
 import com.codahale.metrics.Meter
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.kafka.clients.producer.ProducerRecord
+
 import scala.concurrent.duration._
 
 object KafkaProducerBenchmarks extends LazyLogging {
+
+  val Rnd = ThreadLocalRandom.current()
+
+  def randomMsg(msgBytes: Int): Value = {
+    val array = new Array[Byte](msgBytes)
+    Rnd.nextBytes(array)
+    array
+  }
 
   val logStep = 100000
   /**
@@ -20,7 +31,7 @@ object KafkaProducerBenchmarks extends LazyLogging {
     var lastPartStart = System.nanoTime()
 
     for (i <- 1 to fixture.msgCount) {
-      producer.send(new ProducerRecord[Array[Byte], String](fixture.topic, i.toString))
+      producer.send(new BenchmarkProducerRecord(fixture.topic, randomMsg(fixture.msgBytes)))
       meter.mark()
       if (i % logStep == 0) {
         val lastPartEnd = System.nanoTime()

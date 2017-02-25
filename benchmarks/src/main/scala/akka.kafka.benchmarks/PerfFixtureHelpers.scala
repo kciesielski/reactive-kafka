@@ -5,9 +5,13 @@
 package akka.kafka.benchmarks
 
 import java.util.UUID
+import java.util.concurrent.ThreadLocalRandom
+
+import akka.kafka.benchmarks.Benchmarks.{BenchmarkProducer, BenchmarkProducerRecord}
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.kafka.clients.producer._
-import org.apache.kafka.common.serialization.{ByteArraySerializer, StringSerializer}
+import org.apache.kafka.common.serialization.ByteArraySerializer
+
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Promise}
 import scala.language.postfixOps
@@ -16,6 +20,7 @@ private[benchmarks] trait PerfFixtureHelpers extends LazyLogging {
 
   val producerTimeout = 6 minutes
   val logPercentStep = 1
+  val Rnd = ThreadLocalRandom.current()
 
   def randomId() = UUID.randomUUID().toString
 
@@ -24,15 +29,23 @@ private[benchmarks] trait PerfFixtureHelpers extends LazyLogging {
     producer.close()
   }
 
-  def initTopicAndProducer(kafkaHost: String, topic: String, msgCount: Int = 1): KafkaProducer[Array[Byte], String] = {
+  def randomByteArray(msgBytes: Int): Array[Byte] = {
+    val array = new Array[Byte](msgBytes)
+    Rnd.nextBytes(array)
+    array
+  }
+
+  def initTopicAndProducer(kafkaHost: String, topic: String, msgCount: Int = 1, msgBytes: Int = 10): BenchmarkProducer = {
     val producerJavaProps = new java.util.Properties
     producerJavaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost)
-    val producer = new KafkaProducer[Array[Byte], String](producerJavaProps, new ByteArraySerializer, new StringSerializer)
+    logger.info(s"Initializing producer connection to $kafkaHost")
+    val producer = new BenchmarkProducer(producerJavaProps, new ByteArraySerializer, new ByteArraySerializer)
     val lastElementStoredPromise = Promise[Unit]
     val loggedStep = if (msgCount > logPercentStep) msgCount / (100 / logPercentStep) else 1
+    logger.info(s"Producing messages to topic $topic")
     for (i <- 0L to msgCount.toLong) {
       if (!lastElementStoredPromise.isCompleted) {
-        producer.send(new ProducerRecord[Array[Byte], String](topic, i.toString), new Callback {
+        producer.send(new BenchmarkProducerRecord(topic, randomByteArray(msgBytes)), new Callback {
           override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
             if (e == null) {
               if (i % loggedStep == 0)

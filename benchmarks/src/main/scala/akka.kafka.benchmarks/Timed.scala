@@ -29,7 +29,7 @@ object Timed extends LazyLogging {
     val name = command.testName
     val msgCount = command.msgCount
     logger.info(s"Generating fixture for ${name}_$msgCount")
-    val fixture = fixtureGen.generate(msgCount)
+    val fixture = fixtureGen.generate(msgCount, command.msgBytes)
     val metrics = new MetricRegistry()
     val meter = metrics.meter(name + "_" + msgCount)
     logger.info(s"Running benchmarks for ${name}_$msgCount")

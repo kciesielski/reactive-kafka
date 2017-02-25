@@ -5,14 +5,25 @@
 package akka.kafka.benchmarks
 
 import akka.actor.ActorSystem
+import akka.kafka.ConsumerMessage.CommittableMessage
+import akka.kafka.benchmarks.Timed._
 import akka.kafka.benchmarks.app.RunTestCommand
-import akka.stream.{Materializer, ActorMaterializer}
-import Timed._
-import com.typesafe.config.ConfigFactory
+import akka.stream.Materializer
+import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+
 import scala.concurrent.Future
 import scala.language.postfixOps
 
 object Benchmarks {
+
+  type Key = Array[Byte]
+  type Value = Array[Byte]
+  type BenchmarkProducerRecord = ProducerRecord[Key, Value]
+  type BenchmarkProducer = KafkaProducer[Key, Value]
+  type BenchmarkConsumer = KafkaConsumer[Key, Value]
+  type BenchmarkConsumerRecord = ConsumerRecord[Key, Value]
+  type CommittableMsg = CommittableMessage[Key, Value]
 
   def run(cmd: RunTestCommand)(implicit actorSystem: ActorSystem, mat: Materializer): Unit = {
 

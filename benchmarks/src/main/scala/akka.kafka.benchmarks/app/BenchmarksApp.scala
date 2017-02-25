@@ -30,5 +30,5 @@ object BenchmarksApp extends App with Config with System.LoggerExecutor {
   import System._
 
   log.info("App started")
-  Benchmarks.run(RunTestCommand(testName, kafkaHost, msgCount))
+  Benchmarks.run(RunTestCommand(testName, kafkaHost, msgCount, msgBytes))
 }

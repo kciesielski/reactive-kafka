@@ -5,12 +5,12 @@
 package akka.kafka.benchmarks
 
 import akka.dispatch.ExecutionContexts
-import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffsetBatch}
+import akka.kafka.ConsumerMessage.CommittableOffsetBatch
+import akka.kafka.benchmarks.Benchmarks.{BenchmarkConsumerRecord, CommittableMsg}
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.codahale.metrics.Meter
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.kafka.clients.consumer.ConsumerRecord
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Promise}
@@ -19,8 +19,8 @@ import scala.util.Success
 
 object ReactiveKafkaConsumerBenchmarks extends LazyLogging {
   val streamingTimeout = 30 minutes
-  type NonCommitableFixture = ReactiveKafkaConsumerTestFixture[ConsumerRecord[Array[Byte], String]]
-  type CommitableFixture = ReactiveKafkaConsumerTestFixture[CommittableMessage[Array[Byte], String]]
+  type NonCommitableFixture = ReactiveKafkaConsumerTestFixture[BenchmarkConsumerRecord]
+  type CommitableFixture = ReactiveKafkaConsumerTestFixture[CommittableMsg]
 
   /**
    * Creates a predefined stream, reads N elements, discarding them into a Sink.ignore. Does not commit.
